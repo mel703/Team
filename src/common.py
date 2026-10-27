@@ -1,4 +1,3 @@
-
 """
 Общие функции проекта Sensorless Drive Diagnosis (common.py).
 
@@ -86,20 +85,33 @@ scaler не возвращаем: для новых замеров в main.py х
 """
 
 
+
 def prepare(X_train, X_test):
     """
-    Сергей: z-нормализация без утечки теста.
-    1. StandardScaler.fit() — только на X_train.
-    2. К X_test применяется уже обученный scaler.
-    Возвращает: X_train, X_test — таблицы с теми же именами столбцов.
-    День 2: сюда добавятся решения Валерии (выбросы) и Юлии (лишние столбцы).
+    Нормализация без утечки данных:
+    параметры StandardScaler обучаются только на X_train.
+    Состав и порядок признаков должны совпадать.
     """
-    scaler = StandardScaler().fit(X_train)
-    X_train_s = pd.DataFrame(scaler.transform(X_train),
-                             columns=X_train.columns, index=X_train.index)
-    X_test_s = pd.DataFrame(scaler.transform(X_test),
-                            columns=X_test.columns, index=X_test.index)
-    return X_train_s, X_test_s
+    if not X_train.columns.equals(X_test.columns):
+        raise ValueError(
+            "X_train и X_test должны содержать одинаковые "
+            "столбцы в одинаковом порядке."
+        )
+
+    scaler = StandardScaler()
+    X_train_scaled = pd.DataFrame(
+        scaler.fit_transform(X_train),
+        columns=X_train.columns,
+        index=X_train.index,
+    )
+    X_test_scaled = pd.DataFrame(
+        scaler.transform(X_test),
+        columns=X_test.columns,
+        index=X_test.index,
+    )
+
+    return X_train_scaled, X_test_scaled
+
 
 
 """
@@ -146,7 +158,7 @@ def get_model(random_state=42):
     Настройки Жанны вносятся на день 3, после этого — заморозка.
     """
     return RandomForestClassifier(
-        n_estimators=200,
+        n_estimators=300,
         random_state=random_state,
         n_jobs=-1,
     )
@@ -184,4 +196,3 @@ if __name__ == '__main__':
     X_train_s, X_test_s = prepare(X_train, X_test)
     print(X_train_s.columns[:3].tolist())  # имена столбцов сохранились
     print(outliers(X_train, X).any(axis=1).mean())  # доля строк с выбросами
-
