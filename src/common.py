@@ -124,12 +124,7 @@ CLASSES = np.arange(1, 12)
 
 
 def evaluate(model, X_test, y_test, name='confusion_matrix', show=False):
-    """
-    Сергей: оценить уже обученную модель на тестовой части.
-    Модель и нормализация должны быть обучены до вызова evaluate().
-    Возвращает: {'accuracy': число, 'f1': 11 чисел, 'f1_macro': число};
-    картинку матрицы ошибок кладёт в figures/<name>.png.
-    """
+    
     y_pred = model.predict(X_test)
     result = {
         'accuracy': accuracy_score(y_test, y_pred),
